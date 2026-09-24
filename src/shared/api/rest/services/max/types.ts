@@ -1,5 +1,10 @@
-import { z } from 'zod';
-import type { sendMessageResponseSchema } from './schemas';
+import type { z } from 'zod';
+import type {
+  deleteNotificationResponseSchema,
+  incomingNotificationSchema,
+  receiveNotificationResponseSchema,
+  sendMessageResponseSchema,
+} from './schemas';
 
 export interface MaxApiRequest {
   idInstance: string;
@@ -13,3 +18,21 @@ export interface MaxApiRequest {
 }
 
 export type SendMessageResponse = z.infer<typeof sendMessageResponseSchema>;
+
+export interface ReceiveNotificationRequest {
+  idInstance: string;
+  apiTokenInstance: string;
+  /** Таймаут ожидания уведомления в секундах, от 5 до 60. По умолчанию 5. */
+  receiveTimeout?: number;
+}
+
+export interface DeleteNotificationRequest {
+  idInstance: string;
+  apiTokenInstance: string;
+  /** Идентификатор доставки, полученный методом ReceiveNotification. */
+  receiptId: number;
+}
+
+export type IncomingNotification = z.infer<typeof incomingNotificationSchema>;
+export type ReceiveNotificationResponse = z.infer<typeof receiveNotificationResponseSchema>;
+export type DeleteNotificationResponse = z.infer<typeof deleteNotificationResponseSchema>;

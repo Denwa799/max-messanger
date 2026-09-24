@@ -1,6 +1,7 @@
 import { ENV_CONFIG } from '@shared/configs';
 import { QueryClient } from '@tanstack/react-query';
 import Axios from 'axios';
+
 import { MaxApiError } from './error';
 
 export const maxApiAxios = Axios.create({

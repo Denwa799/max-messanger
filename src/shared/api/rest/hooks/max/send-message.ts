@@ -1,6 +1,6 @@
 import { mutationOptions, useMutation } from '@tanstack/react-query';
-
 import type { UseMutationOptions } from '@tanstack/react-query';
+
 import type { MaxApiRequest, SendMessageResponse } from '../../services/max/types';
 import type { MaxApiError } from '../../client';
 import { MaxService } from '../../services/max';
