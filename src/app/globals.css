@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+
+@theme {
+  --breakpoint-extra-small: 280px;
+  --breakpoint-small: 320px;
+  --breakpoint-mobile: 450px;
+  --breakpoint-medium: 500px;
+  --breakpoint-extra-medium: 600px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-laptop: 1024px;
+  --breakpoint-laptop-big: 1200px;
+  --breakpoint-big: 1440px;
+  --breakpoint-very-big: 1920px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}

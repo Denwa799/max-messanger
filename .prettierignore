@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-ssr
+.output
+.tanstack
+.vscode
+public
+package-lock.json
+**/routeTree.gen.ts

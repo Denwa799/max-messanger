@@ -1,0 +1,52 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "perf": "warn"
+  },
+  "plugins": ["typescript", "unicorn", "oxc", "react"],
+  "rules": {
+    "typescript/no-explicit-any": "error",
+    "react/exhaustive-deps": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true,
+        "allowExportNames": ["Route"],
+        "customHOCs": ["withCan"]
+      }
+    ],
+    "typescript/no-extraneous-class": [
+      "error",
+      {
+        "allowWithDecorator": true
+      }
+    ],
+    "unicorn/no-empty-file": "off",
+    "no-unsafe-optional-chaining": "off",
+    "no-await-in-loop": "off",
+    "oxc/no-map-spread": "off"
+  },
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "overrides": [
+    {
+      "files": ["src/pages/**/*.tsx"],
+      "rules": {
+        "react/only-export-components": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    ".output",
+    ".tanstack",
+    "public",
+    "**/typesAGW.ts",
+    "**/routeTree.gen.ts"
+  ]
+}
