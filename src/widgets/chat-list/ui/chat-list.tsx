@@ -33,6 +33,7 @@ const OVERSCAN = 8;
 export const ChatList = () => {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isStartChatOpen, setIsStartChatOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const scrollParentRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
@@ -40,6 +41,16 @@ export const ChatList = () => {
 
   // Пока инстанс не подключён, диалог ввода перекрывает экран — запрос не отправляем.
   const { chats, isPending, isError, error, refetch } = useChats();
+
+  // Поиск по названию чата и подписи (номер телефона или тип). Регистр и крайние пробелы не важны.
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredChats = normalizedQuery
+    ? chats.filter(
+        (chat) =>
+          chat.title.toLowerCase().includes(normalizedQuery) ||
+          chat.subtitle?.toLowerCase().includes(normalizedQuery),
+      )
+    : chats;
 
   // Активный чат хранится в адресе страницы, а не в сторе.
   const chatMatch = matchRoute({ to: '/chat/$chatId', includeSearch: false });
@@ -49,12 +60,18 @@ export const ChatList = () => {
     void navigate({ to: '/chat/$chatId', params: { chatId: chat.id } });
   };
 
+  // После фильтрации список короче — возвращаем прокрутку к началу, иначе окажемся в пустоте.
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    scrollParentRef.current?.scrollTo({ top: 0 });
+  };
+
   // oxlint-disable-next-line react/incompatible-library -- useVirtualizer возвращает функции, которые React Compiler намеренно не мемоизирует; использование безопасно.
   const virtualizer = useVirtualizer({
-    count: chats.length,
+    count: filteredChats.length,
     getScrollElement: () => scrollParentRef.current,
     estimateSize: () => ROW_ESTIMATED_SIZE,
-    getItemKey: (index) => chats[index].id,
+    getItemKey: (index) => filteredChats[index].id,
     overscan: OVERSCAN,
   });
 
@@ -99,11 +116,21 @@ export const ChatList = () => {
       );
     }
 
+    if (filteredChats.length === 0) {
+      return (
+        <Flex align="center" justify="center" className="min-h-0 flex-1 px-6 text-center">
+          <Typography.Text variant="body" color="secondary">
+            Ничего не найдено
+          </Typography.Text>
+        </Flex>
+      );
+    }
+
     return (
       <CellList ref={scrollParentRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
           {virtualizer.getVirtualItems().map((virtualRow) => {
-            const chat = chats[virtualRow.index];
+            const chat = filteredChats[virtualRow.index];
 
             return (
               <div
@@ -148,9 +175,12 @@ export const ChatList = () => {
           <Input
             size="medium"
             mode="default"
+            value={searchQuery}
+            onChange={(event) => handleSearchChange(event.target.value)}
             iconBefore={<Icon16SearchOutline />}
             placeholder="Поиск"
             aria-label="Поиск по чатам"
+            withClearButton
           />
         </div>
 
