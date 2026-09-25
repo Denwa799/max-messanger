@@ -1,17 +1,6 @@
 import { MaxUI } from '@maxhub/max-ui';
-import { useEffect, useLayoutEffect, useState } from 'react';
 
-const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
-
-const useIsClient = (): boolean => {
-  const [isClient, setIsClient] = useState(false);
-
-  useIsomorphicLayoutEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  return isClient;
-};
+import { useIsClient } from '@shared/lib';
 
 const ROOT_CLASS_NAME = 'h-dvh max-h-full w-full min-w-70 overflow-hidden';
 

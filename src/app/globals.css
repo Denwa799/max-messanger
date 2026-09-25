@@ -19,9 +19,13 @@
 @theme inline {
   --color-text-themed: var(--text-themed);
   --color-text-tertiary: var(--text-tertiary);
+  --color-text-negative: var(--text-negative);
   --color-background-tertiary: var(--background-tertiary);
+  --color-background-overlay: var(--background-overlay);
+  --color-divider-secondary: var(--divider-secondary);
   --color-icon-themed: var(--icon-themed, currentColor);
   --color-icon-muted: color-mix(in oklab, var(--icon-themed, currentColor) 22%, transparent);
+  --radius-floating: var(--size-border-radius-semantic-border-radius-floating);
 }
 
 * {

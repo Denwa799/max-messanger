@@ -1,7 +1,9 @@
+import { getInstanceCredentials } from '@shared/model';
+
 import { MaxService } from '../../services/max';
 import type {
-  DeleteNotificationRequest,
   DeleteNotificationResponse,
+  DeleteNotificationVariables,
 } from '../../services/max/types';
 
 import { createMaxMutation } from './create-max-mutation';
@@ -10,8 +12,10 @@ export const MAX_DELETE_NOTIFICATION_MUTATION_KEY = ['max', 'deleteNotification'
 
 const deleteNotificationMutation = createMaxMutation<
   DeleteNotificationResponse,
-  DeleteNotificationRequest
->(MAX_DELETE_NOTIFICATION_MUTATION_KEY, (payload) => MaxService.deleteNotification(payload));
+  DeleteNotificationVariables
+>(MAX_DELETE_NOTIFICATION_MUTATION_KEY, (variables) =>
+  MaxService.deleteNotification({ ...getInstanceCredentials(), ...variables }),
+);
 
 export const maxDeleteNotificationMutationOptions = deleteNotificationMutation.mutationOptions;
 

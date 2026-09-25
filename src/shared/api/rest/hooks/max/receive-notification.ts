@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 
+import { useInstanceCredentials } from '@shared/model';
+
 import { MaxApiError } from '../../client';
 import { MaxService } from '../../services/max';
 import type { ReceiveNotificationResponse } from '../../services/max/types';
 
 export interface UseMaxReceiveNotificationsOptions {
-  idInstance: string;
-  apiTokenInstance: string;
   /** Таймаут ожидания уведомления в секундах, от 5 до 60. По умолчанию 5. */
   receiveTimeout?: number;
   /** Запускает и останавливает цикл получения уведомлений. По умолчанию `true`. */
@@ -47,13 +47,12 @@ const isRetryable = (error: MaxApiError): boolean =>
  * или переключите `enabled`.
  */
 export const useMaxReceiveNotifications = ({
-  idInstance,
-  apiTokenInstance,
   receiveTimeout = 5,
   enabled = true,
   onNotification,
   onError,
 }: UseMaxReceiveNotificationsOptions): void => {
+  const { idInstance, apiTokenInstance } = useInstanceCredentials();
   const onNotificationRef = useRef(onNotification);
   const onErrorRef = useRef(onError);
 
@@ -65,7 +64,7 @@ export const useMaxReceiveNotifications = ({
   });
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !idInstance || !apiTokenInstance) return;
 
     let cancelled = false;
 

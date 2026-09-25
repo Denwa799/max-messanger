@@ -17,6 +17,9 @@ export interface SendMessageRequest {
   quotedMessageId?: string;
 }
 
+/** Параметры отправки без учётных данных: они подставляются из стора. */
+export type SendMessageVariables = Omit<SendMessageRequest, 'idInstance' | 'apiTokenInstance'>;
+
 export type SendMessageResponse = z.infer<typeof sendMessageResponseSchema>;
 
 export interface ReceiveNotificationRequest {
@@ -32,6 +35,12 @@ export interface DeleteNotificationRequest {
   /** Идентификатор доставки, полученный методом ReceiveNotification. */
   receiptId: number;
 }
+
+/** Параметры подтверждения без учётных данных: они подставляются из стора. */
+export type DeleteNotificationVariables = Omit<
+  DeleteNotificationRequest,
+  'idInstance' | 'apiTokenInstance'
+>;
 
 export type IncomingNotification = z.infer<typeof incomingNotificationSchema>;
 export type ReceiveNotificationResponse = z.infer<typeof receiveNotificationResponseSchema>;
