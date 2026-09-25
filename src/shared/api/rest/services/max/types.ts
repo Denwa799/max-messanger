@@ -1,6 +1,8 @@
 import type { z } from 'zod';
 import type {
+  chatSchema,
   deleteNotificationResponseSchema,
+  getChatsResponseSchema,
   incomingNotificationSchema,
   receiveNotificationResponseSchema,
   sendMessageResponseSchema,
@@ -21,6 +23,15 @@ export interface SendMessageRequest {
 export type SendMessageVariables = Omit<SendMessageRequest, 'idInstance' | 'apiTokenInstance'>;
 
 export type SendMessageResponse = z.infer<typeof sendMessageResponseSchema>;
+
+export interface GetChatsRequest {
+  idInstance: string;
+  apiTokenInstance: string;
+}
+
+export type Chat = z.infer<typeof chatSchema>;
+export type ChatType = Chat['type'];
+export type GetChatsResponse = z.infer<typeof getChatsResponseSchema>;
 
 export interface ReceiveNotificationRequest {
   idInstance: string;

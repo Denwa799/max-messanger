@@ -4,6 +4,20 @@ export const sendMessageResponseSchema = z.object({
   idMessage: z.string(),
 });
 
+/**
+ * Чат из ответа GetChats. Ответ может расширяться новыми полями, поэтому схема
+ * объектная (лишние поля отбрасываются), но без `looseObject` — состав полей чата стабилен.
+ */
+export const chatSchema = z.object({
+  chatId: z.string(),
+  name: z.string(),
+  type: z.enum(['user', 'group', 'channel', 'bot']),
+  /** Номер телефона контакта или 0, если он скрыт либо чат является группой. */
+  phoneNumber: z.number(),
+});
+
+export const getChatsResponseSchema = z.array(chatSchema);
+
 const notificationInstanceDataSchema = z.object({
   idInstance: z.number(),
   wid: z.string(),

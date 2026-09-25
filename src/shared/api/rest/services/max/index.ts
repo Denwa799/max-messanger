@@ -4,6 +4,7 @@ import { MaxApiError, maxApiAxios } from '../../client';
 
 import {
   DELETE_NOTIFICATION_ERROR_RULES,
+  GET_CHATS_ERROR_RULES,
   RECEIVE_NOTIFICATION_ERROR_RULES,
   SEND_MESSAGE_ERROR_RULES,
   resolveErrorMessage,
@@ -11,12 +12,15 @@ import {
 import type { MaxErrorRule } from './errors';
 import {
   deleteNotificationResponseSchema,
+  getChatsResponseSchema,
   receiveNotificationResponseSchema,
   sendMessageResponseSchema,
 } from './schemas';
 import type {
   DeleteNotificationRequest,
   DeleteNotificationResponse,
+  GetChatsRequest,
+  GetChatsResponse,
   ReceiveNotificationRequest,
   ReceiveNotificationResponse,
   SendMessageRequest,
@@ -43,6 +47,16 @@ const withErrorHandling = async <T>(
 };
 
 class MaxApi {
+  async getChats({ idInstance, apiTokenInstance }: GetChatsRequest): Promise<GetChatsResponse> {
+    return withErrorHandling(GET_CHATS_ERROR_RULES, async () => {
+      const { data } = await maxApiAxios.get(
+        `/waInstance${idInstance}/getChats/${apiTokenInstance}`,
+      );
+
+      return getChatsResponseSchema.parse(data);
+    });
+  }
+
   async sendMessage({
     idInstance,
     apiTokenInstance,

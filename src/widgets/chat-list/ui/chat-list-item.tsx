@@ -41,14 +41,18 @@ export const ChatListItem = ({ chat, separator }: ChatListItemProps) => {
         </Avatar.Container>
       }
       title={chat.title}
-      subtitle={<EllipsisText maxLines={1}>{chat.preview}</EllipsisText>}
+      subtitle={
+        chat.subtitle ? <EllipsisText maxLines={1}>{chat.subtitle}</EllipsisText> : undefined
+      }
       innerClassNames={{ after: 'self-start pt-0.75' }}
       after={
         <Flex align="center" gap={4}>
           <ChatStatus chat={chat} />
-          <Typography.Text variant="description" color="tertiary" className="whitespace-nowrap">
-            {chat.time}
-          </Typography.Text>
+          {chat.time && (
+            <Typography.Text variant="description" color="tertiary" className="whitespace-nowrap">
+              {chat.time}
+            </Typography.Text>
+          )}
           {chat.isPinned && <Pin size={16} className="text-text-tertiary" />}
         </Flex>
       }
