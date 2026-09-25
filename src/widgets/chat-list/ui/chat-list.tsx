@@ -1,3 +1,4 @@
+import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   CellAction,
   CellList,
@@ -9,7 +10,7 @@ import {
   Typography,
 } from '@maxhub/max-ui';
 import { LogOut, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { clearInstanceCredentials } from '@shared/model';
 import { ConfirmationDialog } from '@shared/ui';
@@ -17,8 +18,24 @@ import { ConfirmationDialog } from '@shared/ui';
 import { mockChats } from '../model/mock-chats';
 import { ChatListItem } from './chat-list-item';
 
+/** Приблизительная высота строки чата (аватар 52px + вертикальные отступы). */
+const ROW_ESTIMATED_SIZE = 72;
+
+/** Количество строк, отрисованных за пределами видимой области. */
+const OVERSCAN = 8;
+
 export const ChatList = () => {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const scrollParentRef = useRef<HTMLDivElement>(null);
+
+  // oxlint-disable-next-line react/incompatible-library -- useVirtualizer возвращает функции, которые React Compiler намеренно не мемоизирует; использование безопасно.
+  const virtualizer = useVirtualizer({
+    count: mockChats.length,
+    getScrollElement: () => scrollParentRef.current,
+    estimateSize: () => ROW_ESTIMATED_SIZE,
+    getItemKey: (index) => mockChats[index].id,
+    overscan: OVERSCAN,
+  });
 
   const handleLogoutConfirm = () => {
     clearInstanceCredentials();
@@ -47,10 +64,24 @@ export const ChatList = () => {
           />
         </div>
 
-        <CellList className="min-h-0 flex-1 overflow-y-auto">
-          {mockChats.map((chat, index) => (
-            <ChatListItem key={chat.id} chat={chat} separator={index > 0} />
-          ))}
+        <CellList ref={scrollParentRef} className="min-h-0 flex-1 overflow-y-auto">
+          <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const chat = mockChats[virtualRow.index];
+
+              return (
+                <div
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
+                  className="absolute inset-x-0 top-0"
+                  style={{ transform: `translateY(${virtualRow.start}px)` }}
+                >
+                  <ChatListItem chat={chat} separator={virtualRow.index > 0} />
+                </div>
+              );
+            })}
+          </div>
         </CellList>
 
         <div className="border-t border-divider-secondary p-2">
