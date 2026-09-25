@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: prepare-push & tests
+    runs-on: ubuntu-latest
+    env:
+      # Хуки не нужны в CI — `prepare` из husky пропускаем.
+      HUSKY: '0'
+      # Нужен на этапе `vite build` (пререндер), иначе `@shared/configs` бросает при импорте.
+      # Переопределяется через Settings → Secrets and variables → Actions → Variables.
+      VITE_GREEN_API_MAX_URL: ${{ vars.VITE_GREEN_API_MAX_URL || 'https://3100.api.green-api.com' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format, lint, FSD, build (prepare-push)
+        run: npm run prepare-push
+
+      - name: Run tests
+        run: npm run test:run
