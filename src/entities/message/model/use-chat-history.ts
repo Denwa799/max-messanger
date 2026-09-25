@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 
 import { useMaxGetChatHistory } from '@shared/api';
 import type { MaxApiError } from '@shared/api';
-import { useIsInstanceConfigured } from '@shared/model';
 
 import { mapApiMessage } from './map-api-message';
 import type { ChatMessage } from './types';
@@ -26,8 +25,8 @@ export interface ChatHistory {
  * `useConversationMessages`.
  */
 export const useChatHistory = (chatId: string): ChatHistory => {
-  const isConfigured = useIsInstanceConfigured();
-  const query = useMaxGetChatHistory(chatId, isConfigured);
+  // Хук сам выключен, пока инстанс не подключён, и держит кеш в разрезе idInstance.
+  const query = useMaxGetChatHistory(chatId);
 
   const messages = useMemo(
     () =>

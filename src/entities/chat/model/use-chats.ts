@@ -1,5 +1,4 @@
 import { useMaxGetChats } from '@shared/api';
-import { useIsInstanceConfigured } from '@shared/model';
 
 import { mapApiChat } from './map-api-chat';
 import { useAddedChats } from './store';
@@ -9,8 +8,8 @@ import { useAddedChats } from './store';
  * (по номеру телефона), пока сервер их ещё не вернул.
  */
 export const useChats = () => {
-  const isConfigured = useIsInstanceConfigured();
-  const query = useMaxGetChats({ enabled: isConfigured });
+  // Хук сам выключен, пока инстанс не подключён, и держит кеш в разрезе idInstance.
+  const query = useMaxGetChats();
   const addedChats = useAddedChats();
 
   // Добавленные вручную чаты (по номеру) могут ещё не прийти в GetChats — показываем их сразу.

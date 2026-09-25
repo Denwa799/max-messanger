@@ -14,11 +14,10 @@ import {
 import { LogOut, Plus } from 'lucide-react';
 import { useRef, useState } from 'react';
 
-import { resetChats, useChats } from '@entities/chat';
+import { useChats } from '@entities/chat';
 import type { Chat } from '@entities/chat';
-import { resetMessages } from '@entities/message';
+import { useLogout } from '@features/logout';
 import { StartChatModal } from '@features/start-chat';
-import { clearInstanceCredentials } from '@shared/model';
 import { ConfirmationDialog } from '@shared/ui';
 
 import { ChatListItem } from './chat-list-item';
@@ -38,6 +37,7 @@ export const ChatList = () => {
 
   const navigate = useNavigate();
   const matchRoute = useMatchRoute();
+  const logout = useLogout();
 
   // Пока инстанс не подключён, диалог ввода перекрывает экран — запрос не отправляем.
   const { chats, isPending, isError, error, refetch } = useChats();
@@ -76,9 +76,7 @@ export const ChatList = () => {
   });
 
   const handleLogoutConfirm = () => {
-    clearInstanceCredentials();
-    resetChats();
-    resetMessages();
+    logout();
     setIsLogoutConfirmOpen(false);
   };
 

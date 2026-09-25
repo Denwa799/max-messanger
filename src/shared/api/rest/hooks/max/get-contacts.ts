@@ -4,10 +4,12 @@ import { MaxService } from '../../services/max';
 import type { GetContactsResponse } from '../../services/max/types';
 
 import { createMaxQuery } from './create-max-query';
+import { maxQueryKey } from './query-key';
 
-export const MAX_GET_CONTACTS_QUERY_KEY = ['max', 'getContacts'] as const;
+export const maxGetContactsQueryKey = (idInstance: string) =>
+  maxQueryKey(idInstance, 'getContacts');
 
-const getContactsQuery = createMaxQuery<GetContactsResponse>(MAX_GET_CONTACTS_QUERY_KEY, () =>
+const getContactsQuery = createMaxQuery<GetContactsResponse>(maxGetContactsQueryKey, () =>
   MaxService.getContacts(getInstanceCredentials()),
 );
 

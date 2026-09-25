@@ -35,7 +35,7 @@ const toMessage = (signature: string): SyncMessage => {
     : { kind: 'logout' };
 };
 
-const applyRemoteMessage = (message: SyncMessage): void => {
+const applyRemoteMessage = (message: SyncMessage, onRemoteLogout?: () => void): void => {
   isApplyingRemoteUpdate = true;
   try {
     if (message.kind === 'credentials') {
@@ -45,10 +45,22 @@ const applyRemoteMessage = (message: SyncMessage): void => {
 
     useInstanceCredentialsStore.getState().resetCredentials();
     void useInstanceCredentialsStore.persist.clearStorage();
+    // Сама синхронизация чистит только учётные данные — остальное состояние (сторы чатов и
+    // сообщений, кеш запросов) сбрасывает подписчик.
+    onRemoteLogout?.();
   } finally {
     isApplyingRemoteUpdate = false;
   }
 };
+
+export interface InstanceCredentialsSyncOptions {
+  /**
+   * Вызывается при выходе, полученном из другой вкладки. Синхронизация сама чистит только
+   * учётные данные, поэтому здесь нужно сбросить остальное состояние приложения: сторы чатов
+   * и сообщений, кеш запросов.
+   */
+  onRemoteLogout?: () => void;
+}
 
 /**
  * Синхронизирует учётные данные между открытыми вкладками. Cookie общие для браузера,
@@ -57,7 +69,9 @@ const applyRemoteMessage = (message: SyncMessage): void => {
  *
  * Возвращает функцию отписки — вызывайте её при размонтировании.
  */
-export const initInstanceCredentialsSync = (): (() => void) => {
+export const initInstanceCredentialsSync = ({
+  onRemoteLogout,
+}: InstanceCredentialsSyncOptions = {}): (() => void) => {
   if (typeof window === 'undefined' || typeof BroadcastChannel === 'undefined') {
     return () => {};
   }
@@ -77,7 +91,7 @@ export const initInstanceCredentialsSync = (): (() => void) => {
     const parsed = syncMessageSchema.safeParse(event.data);
     if (!parsed.success) return;
 
-    applyRemoteMessage(parsed.data);
+    applyRemoteMessage(parsed.data, onRemoteLogout);
   };
 
   channel.addEventListener('message', handleMessage);
