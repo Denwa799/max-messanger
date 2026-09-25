@@ -19,5 +19,6 @@ const getChatSubtitle = (chat: ApiChat): string =>
 export const mapApiChat = (chat: ApiChat): Chat => ({
   id: chat.chatId,
   title: chat.name,
+  type: chat.type,
   subtitle: getChatSubtitle(chat),
 });

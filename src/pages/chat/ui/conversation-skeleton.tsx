@@ -27,13 +27,19 @@ export const ConversationSkeleton = () => (
       </div>
     </Flex>
 
-    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden p-4">
-      {BUBBLES.map(({ key, widthClass, outgoing }) => (
-        <Skeleton
-          key={key}
-          className={cn('h-10 rounded-2xl', widthClass, outgoing ? 'self-end' : 'self-start')}
-        />
-      ))}
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-4 mobile:px-4">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
+        {BUBBLES.map(({ key, widthClass, outgoing }) => (
+          <Skeleton
+            key={key}
+            className={cn(
+              'h-10 max-w-bubble rounded-2xl tablet:max-w-bubble-tablet laptop:max-w-bubble-laptop',
+              widthClass,
+              outgoing ? 'self-end rounded-br-md' : 'self-start rounded-bl-md',
+            )}
+          />
+        ))}
+      </div>
     </div>
 
     <div className="border-t border-divider-secondary p-3">

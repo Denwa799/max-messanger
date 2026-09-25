@@ -5,6 +5,7 @@ import { MaxApiError, maxApiAxios } from '../../client';
 import {
   CHECK_ACCOUNT_ERROR_RULES,
   DELETE_NOTIFICATION_ERROR_RULES,
+  GET_CHAT_HISTORY_ERROR_RULES,
   GET_CHATS_ERROR_RULES,
   GET_CONTACTS_ERROR_RULES,
   RECEIVE_NOTIFICATION_ERROR_RULES,
@@ -15,6 +16,7 @@ import type { MaxErrorRule } from './errors';
 import {
   checkAccountResponseSchema,
   deleteNotificationResponseSchema,
+  getChatHistoryResponseSchema,
   getChatsResponseSchema,
   getContactsResponseSchema,
   receiveNotificationResponseSchema,
@@ -25,6 +27,8 @@ import type {
   CheckAccountResponse,
   DeleteNotificationRequest,
   DeleteNotificationResponse,
+  GetChatHistoryRequest,
+  GetChatHistoryResponse,
   GetChatsRequest,
   GetChatsResponse,
   GetContactsRequest,
@@ -110,6 +114,22 @@ class MaxApi {
       );
 
       return sendMessageResponseSchema.parse(data);
+    });
+  }
+
+  async getChatHistory({
+    idInstance,
+    apiTokenInstance,
+    chatId,
+    count,
+  }: GetChatHistoryRequest): Promise<GetChatHistoryResponse> {
+    return withErrorHandling(GET_CHAT_HISTORY_ERROR_RULES, async () => {
+      const { data } = await maxApiAxios.post(
+        `/waInstance${idInstance}/getChatHistory/${apiTokenInstance}`,
+        count === undefined ? { chatId } : { chatId, count },
+      );
+
+      return getChatHistoryResponseSchema.parse(data);
     });
   }
 

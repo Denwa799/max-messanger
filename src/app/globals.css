@@ -14,6 +14,11 @@
   --breakpoint-laptop-big: 1200px;
   --breakpoint-big: 1440px;
   --breakpoint-very-big: 1920px;
+
+  /* Предельная ширина пузыря сообщения относительно колонки переписки (max-w-bubble и т.д.). */
+  --container-bubble: 85%;
+  --container-bubble-tablet: 72%;
+  --container-bubble-laptop: 64%;
 }
 
 @theme inline {
@@ -30,6 +35,7 @@
   --color-background-card: var(--background-card);
   --color-background-overlay: var(--background-overlay);
   --color-button-primary: var(--button-primary);
+  --color-button-primary-contrast: var(--button-primary-contrast);
   --color-divider-secondary: var(--divider-secondary);
   --color-icon-themed: var(--icon-themed, currentColor);
   --color-icon-muted: color-mix(in oklab, var(--icon-themed, currentColor) 22%, transparent);

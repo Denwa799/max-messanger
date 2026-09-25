@@ -38,6 +38,29 @@ export const contactSchema = z.object({
 
 export const getContactsResponseSchema = z.array(contactSchema);
 
+/**
+ * Сообщение из GetChatHistory. Пока работаем только с текстом, поэтому берём лишь поля,
+ * нужные для текстовых сообщений, а неизвестные ключи (медиа, опросы, гео, реакции и т.п.)
+ * отбрасываем — так ответ разбирается даже если MAX добавит новые типы сообщений.
+ */
+export const chatMessageSchema = z.looseObject({
+  type: z.enum(['incoming', 'outgoing']),
+  idMessage: z.string(),
+  timestamp: z.number(),
+  typeMessage: z.string(),
+  chatId: z.string(),
+  chatType: z.enum(['user', 'group', 'channel', 'bot']).optional(),
+  statusMessage: z.string().optional(),
+  sendByApi: z.boolean().optional(),
+  senderId: z.string().optional(),
+  senderName: z.string().optional(),
+  senderType: z.string().optional(),
+  senderContactName: z.string().optional(),
+  textMessage: z.string().optional(),
+});
+
+export const getChatHistoryResponseSchema = z.array(chatMessageSchema);
+
 const notificationInstanceDataSchema = z.object({
   idInstance: z.number(),
   wid: z.string(),

@@ -1,9 +1,11 @@
 import type { z } from 'zod';
 import type {
+  chatMessageSchema,
   chatSchema,
   checkAccountResponseSchema,
   contactSchema,
   deleteNotificationResponseSchema,
+  getChatHistoryResponseSchema,
   getChatsResponseSchema,
   getContactsResponseSchema,
   incomingNotificationSchema,
@@ -57,6 +59,23 @@ export interface GetContactsRequest {
 
 export type Contact = z.infer<typeof contactSchema>;
 export type GetContactsResponse = z.infer<typeof getContactsResponseSchema>;
+
+export interface GetChatHistoryRequest {
+  idInstance: string;
+  apiTokenInstance: string;
+  chatId: string;
+  /** Количество сообщений от последних к более старым. По умолчанию 100. */
+  count?: number;
+}
+
+/** Параметры истории без учётных данных: они подставляются из стора. */
+export type GetChatHistoryVariables = Omit<
+  GetChatHistoryRequest,
+  'idInstance' | 'apiTokenInstance'
+>;
+
+export type ChatHistoryMessage = z.infer<typeof chatMessageSchema>;
+export type GetChatHistoryResponse = z.infer<typeof getChatHistoryResponseSchema>;
 
 export interface ReceiveNotificationRequest {
   idInstance: string;
