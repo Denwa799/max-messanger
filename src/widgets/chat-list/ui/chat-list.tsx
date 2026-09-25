@@ -78,6 +78,7 @@ export const ChatList = () => {
   const handleLogoutConfirm = () => {
     logout();
     setIsLogoutConfirmOpen(false);
+    void navigate({ to: '/' });
   };
 
   const renderContent = () => {

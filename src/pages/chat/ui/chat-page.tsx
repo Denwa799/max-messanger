@@ -31,5 +31,7 @@ export const ChatPage = ({ chatId }: ChatPageProps) => {
     );
   }
 
-  return <Conversation chat={chat} />;
+  // key по id: при переходе в другой чат компонент перемонтируется, иначе черновик и
+  // состояние отправки переносились бы из прошлой переписки.
+  return <Conversation key={chat.id} chat={chat} />;
 };

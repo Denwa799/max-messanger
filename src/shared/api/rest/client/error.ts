@@ -27,6 +27,11 @@ export interface MaxApiErrorOptions {
   code?: number | string;
   description?: string;
   userMessage?: string;
+  /**
+   * Ошибка формата ответа: он не прошёл разбор схемой. Это не сетевой сбой, поэтому повторять
+   * запрос бессмысленно — тот же ответ снова не разберётся.
+   */
+  isProtocolError?: boolean;
   cause?: unknown;
 }
 
@@ -35,6 +40,7 @@ export class MaxApiError extends Error {
   readonly code?: number | string;
   readonly description?: string;
   readonly userMessage?: string;
+  readonly isProtocolError?: boolean;
 
   constructor(message: string, options: MaxApiErrorOptions = {}) {
     super(message, { cause: options.cause });
@@ -43,6 +49,7 @@ export class MaxApiError extends Error {
     this.code = options.code;
     this.description = options.description;
     this.userMessage = options.userMessage;
+    this.isProtocolError = options.isProtocolError;
   }
 
   withUserMessage(userMessage: string): MaxApiError {
@@ -53,12 +60,23 @@ export class MaxApiError extends Error {
       code: this.code,
       description: this.description,
       userMessage,
+      isProtocolError: this.isProtocolError,
       cause: this,
     });
   }
 
   static from(error: unknown): MaxApiError {
     if (error instanceof MaxApiError) return error;
+
+    // Ответ пришёл, но не соответствует схеме — помечаем как протокольную ошибку, чтобы
+    // вызывающий код (например, long-polling уведомлений) не повторял запрос бесконечно.
+    if (error instanceof z.ZodError) {
+      return new MaxApiError('Ответ MAX API не соответствует схеме', {
+        description: error.message,
+        isProtocolError: true,
+        cause: error,
+      });
+    }
 
     if (error instanceof AxiosError) {
       const raw = error.response?.data;

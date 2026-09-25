@@ -176,7 +176,9 @@ export const Conversation = ({ chat }: ConversationProps) => {
 
   const handleSend = () => {
     const value = text.trim();
-    if (!value) return;
+    // Пока предыдущая отправка не завершилась, новую не начинаем — иначе Enter дважды
+    // отправит одно и то же сообщение.
+    if (!value || sendMessage.isPending) return;
 
     sendMessage.mutate(
       { chatId: chat.id, message: value },
@@ -190,7 +192,8 @@ export const Conversation = ({ chat }: ConversationProps) => {
             timestamp: Math.floor(Date.now() / 1000),
           });
           atBottomRef.current = true;
-          setText('');
+          // Очищаем поле, только если пользователь не начал набирать новое сообщение.
+          setText((current) => (current.trim() === value ? '' : current));
         },
       },
     );

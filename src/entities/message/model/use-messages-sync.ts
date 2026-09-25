@@ -38,6 +38,8 @@ const toChatMessage = (notification: IncomingNotification): ChatMessage | null =
     text,
     isOutgoing: notification.typeWebhook !== 'incomingMessageReceived',
     timestamp: timestamp ?? Math.floor(Date.now() / 1000),
+    // В группах и каналах по имени собираем серии подряд идущих сообщений одного автора.
+    senderName: senderData.senderName,
   };
 };
 

@@ -63,6 +63,9 @@ export const InstanceSetupModal = () => {
 
     setErrors({});
     setCredentials(formValues);
+    // Очищаем форму: при выходе из аккаунта модалка показывается снова, и секреты прошлой
+    // сессии не должны оставаться в полях.
+    setFormValues({ idInstance: '', apiTokenInstance: '' });
   };
 
   return (

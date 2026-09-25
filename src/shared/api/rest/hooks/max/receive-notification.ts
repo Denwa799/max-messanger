@@ -32,9 +32,12 @@ const delay = (ms: number): Promise<void> =>
  * Повторять имеет смысл только сетевые ошибки и 5xx. Ответы 4xx (неверные
  * `idInstance`/`apiTokenInstance`, заданный `webhookUrl`) сами не «пройдут», поэтому на
  * них цикл останавливается, иначе запросы уходили бы в API бесконечно.
+ *
+ * Ошибки разбора ответа (не по схеме) тоже не повторяем: тот же ответ снова не разберётся,
+ * а неподтверждённое уведомление осталось бы в очереди и крутилось в цикле вечно.
  */
 const isRetryable = (error: MaxApiError): boolean =>
-  error.status === undefined || error.status >= 500;
+  !error.isProtocolError && (error.status === undefined || error.status >= 500);
 
 /**
  * Запускает цикл получения входящих уведомлений: ReceiveNotification → обработка →
