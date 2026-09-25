@@ -11,15 +11,26 @@ const MESSAGE_WEBHOOKS = new Set([
   'outgoingAPIMessageReceived',
 ]);
 
+/** Типы `messageData.typeMessage`, которые считаем текстом: обычное, расширенное и с цитатой. */
+const TEXT_MESSAGE_TYPES = new Set(['textMessage', 'extendedTextMessage', 'quotedMessage']);
+
+/**
+ * Текст нового сообщения: у обычного он в `textMessageData.textMessage`, у сообщения с цитатой —
+ * в `extendedTextMessageData.text`. У удаления и правки текста нового сообщения нет — вернём
+ * `undefined`, и такие уведомления обрабатываются отдельно.
+ */
+const getMessageText = (notification: IncomingNotification): string | undefined => {
+  const { messageData } = notification;
+  if (!messageData || !TEXT_MESSAGE_TYPES.has(messageData.typeMessage ?? '')) return undefined;
+
+  return messageData.textMessageData?.textMessage ?? messageData.extendedTextMessageData?.text;
+};
+
 const toChatMessage = (notification: IncomingNotification): ChatMessage | null => {
-  if (!MESSAGE_WEBHOOKS.has(notification.typeWebhook)) return null;
+  const { idMessage, timestamp, senderData } = notification;
+  const text = getMessageText(notification);
 
-  const { idMessage, timestamp, senderData, messageData } = notification;
-  const text = messageData?.textMessageData?.textMessage;
-
-  if (!idMessage || !senderData || !text || messageData?.typeMessage !== 'textMessage') {
-    return null;
-  }
+  if (!idMessage || !senderData || !text) return null;
 
   return {
     id: idMessage,
@@ -36,10 +47,31 @@ const toChatMessage = (notification: IncomingNotification): ChatMessage | null =
  */
 export const useMessagesSync = (): void => {
   const addMessage = useMessagesStore((state) => state.addMessage);
+  const removeMessage = useMessagesStore((state) => state.removeMessage);
+  const editMessage = useMessagesStore((state) => state.editMessage);
 
   useMaxReceiveNotifications({
-    onNotification: (notification) => {
-      const message = toChatMessage(notification.body);
+    onNotification: ({ body }) => {
+      if (!MESSAGE_WEBHOOKS.has(body.typeWebhook)) return;
+
+      const { messageData } = body;
+
+      // Удаление и правка меняют уже показанное сообщение, а не добавляют новое. Целевое
+      // сообщение приходит в `stanzaId`, поэтому идём по нему, а не по `idMessage`.
+      if (messageData?.typeMessage === 'deletedMessage') {
+        const stanzaId = messageData.deletedMessageData?.stanzaId;
+        if (stanzaId) removeMessage(stanzaId);
+        return;
+      }
+
+      if (messageData?.typeMessage === 'editedMessage') {
+        const edited = messageData.editedMessageData;
+        if (edited?.stanzaId && edited.textMessage)
+          editMessage(edited.stanzaId, edited.textMessage);
+        return;
+      }
+
+      const message = toChatMessage(body);
       if (message) addMessage(message);
     },
     onError: (error) => logError(error, 'Не удалось получить уведомление MAX'),

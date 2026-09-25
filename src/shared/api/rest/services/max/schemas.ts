@@ -78,9 +78,21 @@ const notificationSenderDataSchema = z.object({
   senderPhoneNumber: z.number().optional(),
 });
 
+/**
+ * Тело `messageData` уведомления. Кроме обычного текста сюда приходят удаление, редактирование
+ * и цитата: у каждого свой объект-спутник, а `typeMessage` говорит, какой именно. Наличие всех
+ * полей сразу не предполагается, поэтому все они опциональны.
+ */
 const notificationMessageDataSchema = z.looseObject({
+  /** textMessage / extendedTextMessage — обычное, editedMessage — правка, deletedMessage — удаление, quotedMessage — цитата. */
   typeMessage: z.string().optional(),
   textMessageData: z.looseObject({ textMessage: z.string() }).optional(),
+  /** Текст сообщения с цитатой (`quotedMessage`). */
+  extendedTextMessageData: z.looseObject({ text: z.string() }).optional(),
+  /** `stanzaId` — id удалённого сообщения. */
+  deletedMessageData: z.looseObject({ stanzaId: z.string() }).optional(),
+  /** `stanzaId` — id отредактированного сообщения, `textMessage` — его новый текст. */
+  editedMessageData: z.looseObject({ stanzaId: z.string(), textMessage: z.string() }).optional(),
 });
 
 /**

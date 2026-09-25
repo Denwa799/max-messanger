@@ -2,8 +2,8 @@ import type { ChatHistoryMessage } from '@shared/api';
 
 import type { ChatMessage, MessageStatus } from './types';
 
-/** Типы сообщений MAX, которые считаем текстовыми. */
-const TEXT_MESSAGE_TYPES = new Set(['textMessage', 'extendedTextMessage']);
+/** Типы сообщений MAX, которые считаем текстовыми (включая сообщения с цитатой). */
+const TEXT_MESSAGE_TYPES = new Set(['textMessage', 'extendedTextMessage', 'quotedMessage']);
 
 const toStatus = (value?: string): MessageStatus | undefined =>
   value === 'sent' || value === 'delivered' || value === 'read' ? value : undefined;
