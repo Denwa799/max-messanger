@@ -7,6 +7,21 @@ const maxApiErrorDataSchema = z.object({
   description: z.string().optional(),
 });
 
+/**
+ * Green-API не всегда возвращает ошибку объектом: иногда это строка или произвольный JSON.
+ * Приводим тело к тексту, чтобы не терять реальную причину отказа.
+ */
+const toErrorText = (raw: unknown): string | undefined => {
+  if (raw === undefined || raw === null || raw === '') return undefined;
+  if (typeof raw === 'string') return raw;
+
+  try {
+    return JSON.stringify(raw);
+  } catch {
+    return undefined;
+  }
+};
+
 export interface MaxApiErrorOptions {
   status?: number;
   code?: number | string;
@@ -46,13 +61,14 @@ export class MaxApiError extends Error {
     if (error instanceof MaxApiError) return error;
 
     if (error instanceof AxiosError) {
-      const parsed = maxApiErrorDataSchema.safeParse(error.response?.data);
+      const raw = error.response?.data;
+      const parsed = maxApiErrorDataSchema.safeParse(raw);
       const data = parsed.success ? parsed.data : undefined;
 
       return new MaxApiError(data?.message ?? error.message, {
         status: error.response?.status,
         code: data?.code,
-        description: data?.description,
+        description: data?.description ?? toErrorText(raw),
         cause: error,
       });
     }

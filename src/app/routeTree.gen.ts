@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ChatsRouteImport } from './routes/_chats'
 import { Route as ChatsIndexRouteImport } from './routes/_chats/index'
+import { Route as ChatsChatChatIdRouteImport } from './routes/_chats/chat/$chatId'
 
 const ChatsRoute = ChatsRouteImport.update({
   id: '/_chats',
@@ -21,24 +22,32 @@ const ChatsIndexRoute = ChatsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ChatsRoute,
 } as any)
+const ChatsChatChatIdRoute = ChatsChatChatIdRouteImport.update({
+  id: '/chat/$chatId',
+  path: '/chat/$chatId',
+  getParentRoute: () => ChatsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof ChatsIndexRoute
+  '/chat/$chatId': typeof ChatsChatChatIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof ChatsIndexRoute
+  '/chat/$chatId': typeof ChatsChatChatIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_chats': typeof ChatsRouteWithChildren
   '/_chats/': typeof ChatsIndexRoute
+  '/_chats/chat/$chatId': typeof ChatsChatChatIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/chat/$chatId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/_chats' | '/_chats/'
+  to: '/' | '/chat/$chatId'
+  id: '__root__' | '/_chats' | '/_chats/' | '/_chats/chat/$chatId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -61,15 +70,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatsIndexRouteImport
       parentRoute: typeof ChatsRoute
     }
+    '/_chats/chat/$chatId': {
+      id: '/_chats/chat/$chatId'
+      path: '/chat/$chatId'
+      fullPath: '/chat/$chatId'
+      preLoaderRoute: typeof ChatsChatChatIdRouteImport
+      parentRoute: typeof ChatsRoute
+    }
   }
 }
 
 interface ChatsRouteChildren {
   ChatsIndexRoute: typeof ChatsIndexRoute
+  ChatsChatChatIdRoute: typeof ChatsChatChatIdRoute
 }
 
 const ChatsRouteChildren: ChatsRouteChildren = {
   ChatsIndexRoute: ChatsIndexRoute,
+  ChatsChatChatIdRoute: ChatsChatChatIdRoute,
 }
 
 const ChatsRouteWithChildren = ChatsRoute._addFileChildren(ChatsRouteChildren)

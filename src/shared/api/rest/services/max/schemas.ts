@@ -18,6 +18,26 @@ export const chatSchema = z.object({
 
 export const getChatsResponseSchema = z.array(chatSchema);
 
+/** Ответ CheckAccount. `chatId` приходит только при `exist: true`. */
+export const checkAccountResponseSchema = z.object({
+  exist: z.boolean(),
+  chatId: z.string().optional(),
+});
+
+/**
+ * Контакт из ответа GetContacts. `name` может быть пустой строкой, если с контактом
+ * ещё не было входящей переписки, поэтому отображаемое имя берётся из `contactName`.
+ */
+export const contactSchema = z.object({
+  chatId: z.string(),
+  name: z.string(),
+  contactName: z.string(),
+  type: z.string(),
+  phoneNumber: z.number(),
+});
+
+export const getContactsResponseSchema = z.array(contactSchema);
+
 const notificationInstanceDataSchema = z.object({
   idInstance: z.number(),
   wid: z.string(),

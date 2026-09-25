@@ -1,8 +1,11 @@
 import type { z } from 'zod';
 import type {
   chatSchema,
+  checkAccountResponseSchema,
+  contactSchema,
   deleteNotificationResponseSchema,
   getChatsResponseSchema,
+  getContactsResponseSchema,
   incomingNotificationSchema,
   receiveNotificationResponseSchema,
   sendMessageResponseSchema,
@@ -32,6 +35,28 @@ export interface GetChatsRequest {
 export type Chat = z.infer<typeof chatSchema>;
 export type ChatType = Chat['type'];
 export type GetChatsResponse = z.infer<typeof getChatsResponseSchema>;
+
+export interface CheckAccountRequest {
+  idInstance: string;
+  apiTokenInstance: string;
+  /** Номер телефона без знака `+`, например 79991234567. */
+  phoneNumber: number;
+}
+
+/** Параметры проверки аккаунта без учётных данных: они подставляются из стора. */
+export type CheckAccountVariables = Omit<CheckAccountRequest, 'idInstance' | 'apiTokenInstance'>;
+
+export type CheckAccountResponse = z.infer<typeof checkAccountResponseSchema>;
+
+export interface GetContactsRequest {
+  idInstance: string;
+  apiTokenInstance: string;
+  /** Ограничение количества контактов. Без него отдаются все контакты. */
+  count?: number;
+}
+
+export type Contact = z.infer<typeof contactSchema>;
+export type GetContactsResponse = z.infer<typeof getContactsResponseSchema>;
 
 export interface ReceiveNotificationRequest {
   idInstance: string;

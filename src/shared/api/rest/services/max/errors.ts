@@ -64,6 +64,41 @@ export const GET_CHATS_ERROR_RULES: MaxErrorRule[] = [
   { status: 429, message: 'Превышен лимит запросов в секунду, попробуйте позже' },
 ];
 
+export const GET_CONTACTS_ERROR_RULES: MaxErrorRule[] = [
+  {
+    status: 400,
+    match: (text) => /apiTokenInstance not define/i.test(text),
+    message: 'Не задан apiTokenInstance',
+  },
+  {
+    status: 400,
+    match: (text) => /idInstance not an integer/i.test(text),
+    message: 'Параметр idInstance задан неверно',
+  },
+  { status: 400, message: 'Ошибка валидации запроса' },
+  { status: 429, message: 'Превышен лимит запросов в секунду, попробуйте позже' },
+];
+
+export const CHECK_ACCOUNT_ERROR_RULES: MaxErrorRule[] = [
+  {
+    status: 400,
+    match: (text) => /apiTokenInstance not define/i.test(text),
+    message: 'Не задан apiTokenInstance',
+  },
+  {
+    status: 400,
+    match: (text) => /idInstance not an integer/i.test(text),
+    message: 'Параметр idInstance задан неверно',
+  },
+  {
+    status: 400,
+    match: (text) => /phoneNumber/i.test(text),
+    message: 'Некорректный номер телефона',
+  },
+  { status: 400, message: 'Ошибка валидации запроса' },
+  { status: 429, message: 'Превышен лимит запросов в секунду, попробуйте позже' },
+];
+
 export const DELETE_NOTIFICATION_ERROR_RULES: MaxErrorRule[] = [
   {
     status: 400,

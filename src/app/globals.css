@@ -17,11 +17,19 @@
 }
 
 @theme inline {
-  --color-text-themed: var(--text-themed);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
   --color-text-tertiary: var(--text-tertiary);
+  --color-text-themed: var(--text-themed);
   --color-text-negative: var(--text-negative);
+  --color-text-primary-inverse: var(--text-primary-inverse);
+  --color-background-primary: var(--background-primary);
+  --color-background-secondary: var(--background-secondary);
   --color-background-tertiary: var(--background-tertiary);
+  --color-background-surface: var(--background-surface);
+  --color-background-card: var(--background-card);
   --color-background-overlay: var(--background-overlay);
+  --color-button-primary: var(--button-primary);
   --color-divider-secondary: var(--divider-secondary);
   --color-icon-themed: var(--icon-themed, currentColor);
   --color-icon-muted: color-mix(in oklab, var(--icon-themed, currentColor) 22%, transparent);

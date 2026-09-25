@@ -1,3 +1,4 @@
+import { useMatchRoute, useNavigate } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   Button,
@@ -8,18 +9,20 @@ import {
   IconButton,
   Input,
   Panel,
-  Spinner,
   Typography,
 } from '@maxhub/max-ui';
 import { LogOut, Plus } from 'lucide-react';
 import { useRef, useState } from 'react';
 
-import { useMaxGetChats } from '@shared/api';
-import { clearInstanceCredentials, useIsInstanceConfigured } from '@shared/model';
+import { resetChats, useChats } from '@entities/chat';
+import type { Chat } from '@entities/chat';
+import { resetMessages } from '@entities/message';
+import { StartChatModal } from '@features/start-chat';
+import { clearInstanceCredentials } from '@shared/model';
 import { ConfirmationDialog } from '@shared/ui';
 
-import { mapChat } from '../model/map-chats';
 import { ChatListItem } from './chat-list-item';
+import { ChatListSkeleton } from './chat-list-skeleton';
 
 /** Приблизительная высота строки чата (аватар 52px + вертикальные отступы). */
 const ROW_ESTIMATED_SIZE = 72;
@@ -29,13 +32,22 @@ const OVERSCAN = 8;
 
 export const ChatList = () => {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [isStartChatOpen, setIsStartChatOpen] = useState(false);
   const scrollParentRef = useRef<HTMLDivElement>(null);
 
-  const isConfigured = useIsInstanceConfigured();
-  // Пока инстанс не подключён, диалог ввода перекрывает экран — запрос не отправляем.
-  const { data, isPending, isError, error, refetch } = useMaxGetChats({ enabled: isConfigured });
+  const navigate = useNavigate();
+  const matchRoute = useMatchRoute();
 
-  const chats = data?.map(mapChat) ?? [];
+  // Пока инстанс не подключён, диалог ввода перекрывает экран — запрос не отправляем.
+  const { chats, isPending, isError, error, refetch } = useChats();
+
+  // Активный чат хранится в адресе страницы, а не в сторе.
+  const chatMatch = matchRoute({ to: '/chat/$chatId', includeSearch: false });
+  const selectedChatId = chatMatch ? chatMatch.chatId : undefined;
+
+  const handleOpenChat = (chat: Chat) => {
+    void navigate({ to: '/chat/$chatId', params: { chatId: chat.id } });
+  };
 
   // oxlint-disable-next-line react/incompatible-library -- useVirtualizer возвращает функции, которые React Compiler намеренно не мемоизирует; использование безопасно.
   const virtualizer = useVirtualizer({
@@ -48,16 +60,14 @@ export const ChatList = () => {
 
   const handleLogoutConfirm = () => {
     clearInstanceCredentials();
+    resetChats();
+    resetMessages();
     setIsLogoutConfirmOpen(false);
   };
 
   const renderContent = () => {
     if (isPending) {
-      return (
-        <Flex align="center" justify="center" className="min-h-0 flex-1">
-          <Spinner size={24} appearance="primary" />
-        </Flex>
-      );
+      return <ChatListSkeleton />;
     }
 
     if (isError) {
@@ -83,7 +93,7 @@ export const ChatList = () => {
       return (
         <Flex align="center" justify="center" className="min-h-0 flex-1 px-6 text-center">
           <Typography.Text variant="body" color="secondary">
-            Пока нет чатов
+            Пока нет чатов. Начните новый по кнопке «+».
           </Typography.Text>
         </Flex>
       );
@@ -103,7 +113,12 @@ export const ChatList = () => {
                 className="absolute inset-x-0 top-0"
                 style={{ transform: `translateY(${virtualRow.start}px)` }}
               >
-                <ChatListItem chat={chat} separator={virtualRow.index > 0} />
+                <ChatListItem
+                  chat={chat}
+                  separator={virtualRow.index > 0}
+                  selected={selectedChatId === chat.id}
+                  onSelect={handleOpenChat}
+                />
               </div>
             );
           })}
@@ -115,16 +130,21 @@ export const ChatList = () => {
   return (
     <aside className="h-full w-full">
       <Panel mode="primary" className="flex h-full flex-col">
-        <Flex align="center" justify="space-between" className="px-4 pt-4 pb-2">
+        <Flex align="center" justify="space-between" className="px-4 pt-4 pb-4">
           <Typography.Title variant="large-strong" asChild>
             <h1>Чаты</h1>
           </Typography.Title>
-          <IconButton variant="primary" size="small" aria-label="Новый чат">
+          <IconButton
+            variant="primary"
+            size="small"
+            aria-label="Новый чат"
+            onClick={() => setIsStartChatOpen(true)}
+          >
             <Plus />
           </IconButton>
         </Flex>
 
-        <div className="px-4 pb-2">
+        <div className="px-4 pb-4">
           <Input
             size="medium"
             mode="default"
@@ -146,6 +166,8 @@ export const ChatList = () => {
           </CellAction>
         </div>
       </Panel>
+
+      <StartChatModal open={isStartChatOpen} onClose={() => setIsStartChatOpen(false)} />
 
       <ConfirmationDialog
         open={isLogoutConfirmOpen}

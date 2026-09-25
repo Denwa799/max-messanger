@@ -3,24 +3,32 @@ import { logError } from '@shared/lib';
 import { MaxApiError, maxApiAxios } from '../../client';
 
 import {
+  CHECK_ACCOUNT_ERROR_RULES,
   DELETE_NOTIFICATION_ERROR_RULES,
   GET_CHATS_ERROR_RULES,
+  GET_CONTACTS_ERROR_RULES,
   RECEIVE_NOTIFICATION_ERROR_RULES,
   SEND_MESSAGE_ERROR_RULES,
   resolveErrorMessage,
 } from './errors';
 import type { MaxErrorRule } from './errors';
 import {
+  checkAccountResponseSchema,
   deleteNotificationResponseSchema,
   getChatsResponseSchema,
+  getContactsResponseSchema,
   receiveNotificationResponseSchema,
   sendMessageResponseSchema,
 } from './schemas';
 import type {
+  CheckAccountRequest,
+  CheckAccountResponse,
   DeleteNotificationRequest,
   DeleteNotificationResponse,
   GetChatsRequest,
   GetChatsResponse,
+  GetContactsRequest,
+  GetContactsResponse,
   ReceiveNotificationRequest,
   ReceiveNotificationResponse,
   SendMessageRequest,
@@ -54,6 +62,36 @@ class MaxApi {
       );
 
       return getChatsResponseSchema.parse(data);
+    });
+  }
+
+  async getContacts({
+    idInstance,
+    apiTokenInstance,
+    count,
+  }: GetContactsRequest): Promise<GetContactsResponse> {
+    return withErrorHandling(GET_CONTACTS_ERROR_RULES, async () => {
+      const { data } = await maxApiAxios.get(
+        `/waInstance${idInstance}/getContacts/${apiTokenInstance}`,
+        { params: count === undefined ? undefined : { count } },
+      );
+
+      return getContactsResponseSchema.parse(data);
+    });
+  }
+
+  async checkAccount({
+    idInstance,
+    apiTokenInstance,
+    phoneNumber,
+  }: CheckAccountRequest): Promise<CheckAccountResponse> {
+    return withErrorHandling(CHECK_ACCOUNT_ERROR_RULES, async () => {
+      const { data } = await maxApiAxios.post(
+        `/waInstance${idInstance}/checkAccount/${apiTokenInstance}`,
+        { phoneNumber },
+      );
+
+      return checkAccountResponseSchema.parse(data);
     });
   }
 
