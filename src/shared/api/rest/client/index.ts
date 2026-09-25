@@ -1,5 +1,4 @@
 import { ENV_CONFIG } from '@shared/configs';
-import { QueryClient } from '@tanstack/react-query';
 import Axios from 'axios';
 
 import { MaxApiError } from './error';
@@ -13,7 +12,5 @@ maxApiAxios.interceptors.response.use(
   (response) => response,
   (error: unknown) => Promise.reject(MaxApiError.from(error)),
 );
-
-export const queryClient = new QueryClient();
 
 export * from './error';

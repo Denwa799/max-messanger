@@ -11,6 +11,7 @@ export interface MaxApiErrorOptions {
   status?: number;
   code?: number | string;
   description?: string;
+  userMessage?: string;
   cause?: unknown;
 }
 
@@ -18,7 +19,7 @@ export class MaxApiError extends Error {
   readonly status?: number;
   readonly code?: number | string;
   readonly description?: string;
-  userMessage?: string;
+  readonly userMessage?: string;
 
   constructor(message: string, options: MaxApiErrorOptions = {}) {
     super(message, { cause: options.cause });
@@ -26,6 +27,19 @@ export class MaxApiError extends Error {
     this.status = options.status;
     this.code = options.code;
     this.description = options.description;
+    this.userMessage = options.userMessage;
+  }
+
+  withUserMessage(userMessage: string): MaxApiError {
+    if (this.userMessage === userMessage) return this;
+
+    return new MaxApiError(this.message, {
+      status: this.status,
+      code: this.code,
+      description: this.description,
+      userMessage,
+      cause: this,
+    });
   }
 
   static from(error: unknown): MaxApiError {

@@ -12,7 +12,7 @@ const routerDevtools = {
   render: <TanStackRouterDevtoolsPanel />,
 };
 
-export function AppDevtools() {
+export const AppDevtools = () => {
   return (
     <TanStackDevtools
       config={{
@@ -21,4 +21,4 @@ export function AppDevtools() {
       plugins={[routerDevtools, queryDevtools]}
     />
   );
-}
+};

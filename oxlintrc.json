@@ -38,6 +38,12 @@
       "rules": {
         "react/only-export-components": "off"
       }
+    },
+    {
+      "files": ["src/app/routes/**/*.tsx"],
+      "rules": {
+        "react/only-export-components": "off"
+      }
     }
   ],
   "ignorePatterns": [

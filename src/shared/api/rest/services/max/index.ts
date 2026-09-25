@@ -1,4 +1,4 @@
-import { getError } from '@shared/lib';
+import { logError } from '@shared/lib';
 
 import { MaxApiError, maxApiAxios } from '../../client';
 
@@ -8,6 +8,7 @@ import {
   SEND_MESSAGE_ERROR_RULES,
   resolveErrorMessage,
 } from './errors';
+import type { MaxErrorRule } from './errors';
 import {
   deleteNotificationResponseSchema,
   receiveNotificationResponseSchema,
@@ -16,11 +17,30 @@ import {
 import type {
   DeleteNotificationRequest,
   DeleteNotificationResponse,
-  MaxApiRequest,
   ReceiveNotificationRequest,
   ReceiveNotificationResponse,
+  SendMessageRequest,
   SendMessageResponse,
 } from './types';
+
+/**
+ * Единая точка обработки ошибок MAX API: приводит ошибку к `MaxApiError`, подбирает
+ * пользовательское сообщение по правилам и логирует. Логика одинакова для всех методов
+ * сервиса, поэтому вынесена из каждого запроса в один хелпер.
+ */
+const withErrorHandling = async <T>(
+  rules: MaxErrorRule[],
+  request: () => Promise<T>,
+): Promise<T> => {
+  try {
+    return await request();
+  } catch (error) {
+    const apiError = MaxApiError.from(error);
+    const maxError = apiError.withUserMessage(resolveErrorMessage(rules, apiError));
+    logError(maxError);
+    throw maxError;
+  }
+};
 
 class MaxApi {
   async sendMessage({
@@ -30,20 +50,15 @@ class MaxApi {
     chatId,
     typingTime,
     quotedMessageId,
-  }: MaxApiRequest): Promise<SendMessageResponse> {
-    try {
+  }: SendMessageRequest): Promise<SendMessageResponse> {
+    return withErrorHandling(SEND_MESSAGE_ERROR_RULES, async () => {
       const { data } = await maxApiAxios.post(
         `/waInstance${idInstance}/sendMessage/${apiTokenInstance}`,
         { chatId, message, typingTime, quotedMessageId },
       );
 
       return sendMessageResponseSchema.parse(data);
-    } catch (error) {
-      const maxError = MaxApiError.from(error);
-      maxError.userMessage = resolveErrorMessage(SEND_MESSAGE_ERROR_RULES, maxError);
-      getError({ error: maxError });
-      throw maxError;
-    }
+    });
   }
 
   async receiveNotification({
@@ -51,7 +66,7 @@ class MaxApi {
     apiTokenInstance,
     receiveTimeout = 5,
   }: ReceiveNotificationRequest): Promise<ReceiveNotificationResponse | null> {
-    try {
+    return withErrorHandling(RECEIVE_NOTIFICATION_ERROR_RULES, async () => {
       const { data } = await maxApiAxios.get(
         `/waInstance${idInstance}/receiveNotification/${apiTokenInstance}`,
         {
@@ -66,12 +81,7 @@ class MaxApi {
       if (data === '' || data === null || data === undefined) return null;
 
       return receiveNotificationResponseSchema.parse(data);
-    } catch (error) {
-      const maxError = MaxApiError.from(error);
-      maxError.userMessage = resolveErrorMessage(RECEIVE_NOTIFICATION_ERROR_RULES, maxError);
-      getError({ error: maxError });
-      throw maxError;
-    }
+    });
   }
 
   async deleteNotification({
@@ -79,18 +89,13 @@ class MaxApi {
     apiTokenInstance,
     receiptId,
   }: DeleteNotificationRequest): Promise<DeleteNotificationResponse> {
-    try {
+    return withErrorHandling(DELETE_NOTIFICATION_ERROR_RULES, async () => {
       const { data } = await maxApiAxios.delete(
         `/waInstance${idInstance}/deleteNotification/${apiTokenInstance}/${receiptId}`,
       );
 
       return deleteNotificationResponseSchema.parse(data);
-    } catch (error) {
-      const maxError = MaxApiError.from(error);
-      maxError.userMessage = resolveErrorMessage(DELETE_NOTIFICATION_ERROR_RULES, maxError);
-      getError({ error: maxError });
-      throw maxError;
-    }
+    });
   }
 }
 

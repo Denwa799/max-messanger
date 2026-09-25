@@ -1,3 +1,6 @@
+@layer theme, base, max-ui, components, utilities;
+
+@import '@maxhub/max-ui/dist/styles.css' layer(max-ui);
 @import 'tailwindcss';
 
 @theme {
@@ -13,16 +16,28 @@
   --breakpoint-very-big: 1920px;
 }
 
+@theme inline {
+  --color-text-themed: var(--text-themed);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-background-tertiary: var(--background-tertiary);
+  --color-icon-themed: var(--icon-themed, currentColor);
+  --color-icon-muted: color-mix(in oklab, var(--icon-themed, currentColor) 22%, transparent);
+}
+
 * {
   box-sizing: border-box;
 }
 
+:root {
+  color-scheme: light dark;
+}
+
 html,
-body,
-#app {
-  min-height: 100%;
+body {
+  height: 100%;
 }
 
 body {
   margin: 0;
+  overflow-x: auto;
 }

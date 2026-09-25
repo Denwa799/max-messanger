@@ -1,22 +1,15 @@
-import { mutationOptions, useMutation } from '@tanstack/react-query';
-import type { UseMutationOptions } from '@tanstack/react-query';
-
-import type { MaxApiRequest, SendMessageResponse } from '../../services/max/types';
-import type { MaxApiError } from '../../client';
 import { MaxService } from '../../services/max';
+import type { SendMessageRequest, SendMessageResponse } from '../../services/max/types';
+
+import { createMaxMutation } from './create-max-mutation';
 
 export const MAX_SEND_MESSAGE_MUTATION_KEY = ['max', 'sendMessage'] as const;
 
-export const maxSendMessageMutationOptions = () =>
-  mutationOptions<SendMessageResponse, MaxApiError, MaxApiRequest>({
-    mutationKey: MAX_SEND_MESSAGE_MUTATION_KEY,
-    mutationFn: (payload) => MaxService.sendMessage(payload),
-  });
+const sendMessageMutation = createMaxMutation<SendMessageResponse, SendMessageRequest>(
+  MAX_SEND_MESSAGE_MUTATION_KEY,
+  (payload) => MaxService.sendMessage(payload),
+);
 
-type SendMessageMutationOptions = Omit<
-  UseMutationOptions<SendMessageResponse, MaxApiError, MaxApiRequest>,
-  'mutationFn' | 'mutationKey'
->;
+export const maxSendMessageMutationOptions = sendMessageMutation.mutationOptions;
 
-export const useMaxSendMessage = (options?: SendMessageMutationOptions) =>
-  useMutation({ ...maxSendMessageMutationOptions(), ...options });
+export const useMaxSendMessage = sendMessageMutation.useMutation;

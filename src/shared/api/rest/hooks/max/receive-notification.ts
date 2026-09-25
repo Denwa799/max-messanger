@@ -29,10 +29,22 @@ const delay = (ms: number): Promise<void> =>
   });
 
 /**
+ * Повторять имеет смысл только сетевые ошибки и 5xx. Ответы 4xx (неверные
+ * `idInstance`/`apiTokenInstance`, заданный `webhookUrl`) сами не «пройдут», поэтому на
+ * них цикл останавливается, иначе запросы уходили бы в API бесконечно.
+ */
+const isRetryable = (error: MaxApiError): boolean =>
+  error.status === undefined || error.status >= 500;
+
+/**
  * Запускает цикл получения входящих уведомлений: ReceiveNotification → обработка →
  * DeleteNotification. Уведомления приходят в порядке FIFO, а `receiveNotification`
  * удерживает запрос до `receiveTimeout` секунд, поэтому цикл работает как long-polling
  * без дополнительных интервалов опроса.
+ *
+ * Цикл останавливается на неретраибельной ошибке (см. `isRetryable`), при
+ * `enabled = false` и при размонтировании — чтобы перезапустить, подключите хук заново
+ * или переключите `enabled`.
  */
 export const useMaxReceiveNotifications = ({
   idInstance,
@@ -79,7 +91,12 @@ export const useMaxReceiveNotifications = ({
           });
         } catch (error) {
           if (cancelled) return;
-          onErrorRef.current?.(MaxApiError.from(error));
+
+          const maxError = MaxApiError.from(error);
+          onErrorRef.current?.(maxError);
+
+          if (!isRetryable(maxError)) return;
+
           await delay(RETRY_DELAY_MS);
         }
       }

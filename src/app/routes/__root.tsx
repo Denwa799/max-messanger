@@ -1,15 +1,15 @@
 import { createRootRouteWithContext } from '@tanstack/react-router';
 
-import { App } from '@app/App';
+import { App } from '@app/app';
 import appCss from '@app/globals.css?url';
 
 import type { QueryClient } from '@tanstack/react-query';
 
-interface MyRouterContext {
+interface RouterContext {
   queryClient: QueryClient;
 }
 
-export const Route = createRootRouteWithContext<MyRouterContext>()({
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       {
@@ -17,10 +17,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
+        content: 'width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'MAX Messenger',
       },
     ],
     links: [

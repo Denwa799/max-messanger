@@ -6,7 +6,7 @@ import type {
   sendMessageResponseSchema,
 } from './schemas';
 
-export interface MaxApiRequest {
+export interface SendMessageRequest {
   idInstance: string;
   apiTokenInstance: string;
   message: string;
