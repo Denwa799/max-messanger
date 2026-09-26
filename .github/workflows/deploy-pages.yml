@@ -1,0 +1,67 @@
+name: Deploy to GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  # Хуки не нужны в CI — `prepare` из husky пропускаем.
+  HUSKY: '0'
+  VITE_GREEN_API_MAX_URL: ${{ vars.VITE_GREEN_API_MAX_URL || 'https://3100.api.green-api.com' }}
+  # Project site отдаётся из подпути: https://denwa799.github.io/max-messanger/
+  VITE_BASE_PATH: /max-messanger/
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Prepare Pages artifact
+        run: |
+          # У GitHub Pages нет history fallback: любые пути должны отдавать оболочку SPA.
+          cp dist/client/index.html dist/client/404.html
+          # Страховка на случай деплоя из ветки — Jekyll не должен трогать файлы с "_".
+          touch dist/client/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/client
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

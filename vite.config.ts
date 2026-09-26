@@ -7,7 +7,12 @@ import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react';
 import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 
+// Проектные сайты GitHub Pages отдаются из подпути (/<repo>/), поэтому база
+// ассетов должна совпадать с ним. Локальная разработка и деплой в корень оставляют '/'.
+const base = process.env.VITE_BASE_PATH ?? '/';
+
 const config = defineConfig({
+  base,
   resolve: { tsconfigPaths: true },
   server: {
     port: 3000,

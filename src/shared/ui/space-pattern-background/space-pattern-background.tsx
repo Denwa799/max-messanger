@@ -2,7 +2,9 @@ import type { CSSProperties } from 'react';
 
 import { cn } from '@shared/lib';
 
-const PATTERN_URL = '/pattern-space.svg';
+// BASE_URL заканчивается на '/', поэтому ассет разрешается от корня деплоя
+// ('/' локально, '/max-messanger/' на проектном сайте GitHub Pages).
+const PATTERN_URL = `${import.meta.env.BASE_URL}pattern-space.svg`;
 const TILE_SIZE = 280;
 const LINE_COLOR_CLASS = 'text-icon-muted';
 
